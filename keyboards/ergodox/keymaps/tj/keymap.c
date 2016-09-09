@@ -2,9 +2,14 @@
 #include "debug.h"
 #include "action_layer.h"
 
+#define LEADER_TIMEOUT 300
+
 #define BASE 0 // default layer
 #define SYMB 1 // symbols
 #define MDIA 2 // media keys
+
+// MACROS
+/* #define */ 
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /* Keymap 0: Basic layer
@@ -12,7 +17,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,--------------------------------------------------.           ,--------------------------------------------------.
  * |   =    |   1  |   2  |   3  |   4  |   5  | LEFT |           | RIGHT|   6  |   7  |   8  |   9  |   0  |   -    |
  * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
- * | Del    |   Q  |   W  |   E  |   R  |   T  |Insrt |           | Pse  |   Y  |   U  |   I  |   O  |   P  |   \    |
+ * | Del    |   Q  |   W  |   E  |   R  |   T  |Insrt |           | LDR  |   Y  |   U  |   I  |   O  |   P  |   \    |
  * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
  * | Grv    |   A  |   S  |   D  |   F  |   G  |------|           |------|   H  | J/Alt|   K  |   L  |; / L2|   '    |
  * |--------+------+------+------+------+------| Hyper|           | Meh  |------+------+------+------+------+--------|
@@ -32,21 +37,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Otherwise, it needs KC_*
 [BASE] = KEYMAP(  // layer 0 : default
         // left hand
-        KC_EQL,         KC_1,         KC_2,   KC_3,   KC_4,   KC_5,   KC_LEFT,
-        KC_DELT,        KC_Q,         KC_W,   KC_E,   KC_R,   KC_T,   KC_INSERT,
-        KC_GRV,         KC_A,         KC_S,   KC_D,   KC_F,   KC_G,
-        KC_LSFT,        KC_LCTL,      KC_X,   KC_C,   KC_V,   KC_B,   ALL_T(KC_NO),
-        KC_Z,           KC_QUOT,      LALT(KC_LSFT),  KC_LEFT,KC_RGHT,
-                                              ALT_T(KC_APP),  KC_LGUI,
-                                                              KC_HOME,
-                                              KC_SPC,KC_BSPC, KC_END,
+        KC_EQL,         KC_1,         KC_2,           KC_3,    KC_4,   KC_5,   KC_LEFT,        
+        KC_DELT,        KC_Q,         KC_W,           KC_E,    KC_R,   KC_T,   KC_INSERT,
+        KC_GRV,         KC_A,         KC_S,           KC_D,    KC_F,   KC_G,
+        KC_LSFT,        KC_LCTL,      KC_X,           KC_C,    KC_V,   KC_B,   ALL_T(KC_NO),
+        KC_Z,           KC_QUOT,      LALT(KC_LSFT),  KC_LEFT, KC_RGHT,
+                                              ALT_T(KC_APP),   KC_LGUI,
+                                                               KC_HOME,
+                                              KC_SPC,KC_BSPC,  KC_END,
 
         // right hand
-             KC_RGHT,     KC_6,   KC_7,   KC_8,   KC_9,   KC_0,             KC_MINS,
-             KC_PAUSE,    KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,             KC_BSLS,
-                          KC_H,   ALT_T(KC_J),   KC_K,   KC_L,   LT(MDIA, KC_SCLN),KC_QUOT,
-             MEH_T(KC_NO),KC_N,   KC_M,   KC_COMM,KC_DOT, CTL_T(KC_SLSH),   KC_FN1,
-                                  KC_UP,  KC_DOWN,KC_LBRC,KC_RBRC,          KC_RSFT,
+             KC_RGHT,     KC_6,   KC_7,         KC_8,       KC_9,   KC_0,             KC_MINS,
+             KC_LEAD,     KC_Y,   KC_U,         KC_I,       KC_O,   KC_P,             KC_BSLS,
+                          KC_H,   ALT_T(KC_J),  KC_K,       KC_L,   LT(MDIA, KC_SCLN),KC_QUOT,
+             MEH_T(KC_NO),KC_N,   KC_M,         KC_COMM,    KC_DOT, CTL_T(KC_SLSH),   KC_FN1,
+                                  KC_UP,        KC_DOWN,    KC_LBRC,KC_RBRC,          KC_RSFT,
              KC_LALT,        CTL_T(KC_ESC),
              KC_PGUP,
              KC_PGDN,KC_TAB, KC_ENT
@@ -160,6 +165,9 @@ void matrix_init_user(void) {
 
 };
 
+
+LEADER_EXTERNS();
+
 // Runs constantly in the background, in a loop.
 void matrix_scan_user(void) {
 
@@ -182,4 +190,23 @@ void matrix_scan_user(void) {
             break;
     }
 
+    LEADER_DICTIONARY() {
+      leading = false;
+      leader_end();
+
+      SEQ_ONE_KEY(KC_F) {
+        register_code(KC_S);
+        unregister_code(KC_S);
+      }
+      SEQ_TWO_KEYS(KC_A, KC_S) {
+        register_code(KC_H);
+        unregister_code(KC_H);
+      }
+      SEQ_THREE_KEYS(KC_A, KC_S, KC_D) {
+        register_code(KC_LGUI);
+        register_code(KC_S);
+        unregister_code(KC_S);
+        unregister_code(KC_LGUI);
+    }
+  }
 };

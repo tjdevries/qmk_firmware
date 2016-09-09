@@ -2,14 +2,15 @@
 #include "debug.h"
 #include "action_layer.h"
 
-#define LEADER_TIMEOUT 300
+#undef LEADER_TIMEOUT
+#define LEADER_TIMEOUT 1000
 
 #define BASE 0 // default layer
 #define SYMB 1 // symbols
 #define MDIA 2 // media keys
 
 // MACROS
-/* #define */ 
+/* #define */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /* Keymap 0: Basic layer
@@ -37,7 +38,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Otherwise, it needs KC_*
 [BASE] = KEYMAP(  // layer 0 : default
         // left hand
-        KC_EQL,         KC_1,         KC_2,           KC_3,    KC_4,   KC_5,   KC_LEFT,        
+        KC_EQL,         KC_1,         KC_2,           KC_3,    KC_4,   KC_5,   KC_LEFT,
         KC_DELT,        KC_Q,         KC_W,           KC_E,    KC_R,   KC_T,   KC_INSERT,
         KC_GRV,         KC_A,         KC_S,           KC_D,    KC_F,   KC_G,
         KC_LSFT,        KC_LCTL,      KC_X,           KC_C,    KC_V,   KC_B,   ALL_T(KC_NO),
@@ -194,18 +195,18 @@ void matrix_scan_user(void) {
       leading = false;
       leader_end();
 
-      SEQ_ONE_KEY(KC_F) {
-        register_code(KC_S);
-        unregister_code(KC_S);
-      }
-      SEQ_TWO_KEYS(KC_A, KC_S) {
-        register_code(KC_H);
-        unregister_code(KC_H);
+      // SEQ_ONE_KEY(KC_F) {
+      //   register_code(KC_S);
+      //   unregister_code(KC_S);
+      // }
+      SEQ_TWO_KEYS(KC_G, KC_T) {
+        register_code(KC_LCTL);
+        register_code(KC_RBRC);
+        unregister_code(KC_RBRC);
+        unregister_code(KC_LCTL);
       }
       SEQ_THREE_KEYS(KC_A, KC_S, KC_D) {
         register_code(KC_LGUI);
-        register_code(KC_S);
-        unregister_code(KC_S);
         unregister_code(KC_LGUI);
     }
   }

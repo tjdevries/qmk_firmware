@@ -11,6 +11,11 @@
 
 // MACROS
 /* #define */
+#define CTLSHFT 1  // M-CS
+
+// TIMERS
+#define KEY_TAP_FAST 85
+#define KEY_TAP_SLOW 200
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /* Keymap 0: Basic layer
@@ -22,7 +27,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
  * | Grv    |   A  |   S  |   D  |   F  |   G  |------|           |------|   H  | J/Alt|   K  |   L  |; / L2|   '    |
  * |--------+------+------+------+------+------| Hyper|           | Meh  |------+------+------+------+------+--------|
- * | LShift | Ctrl |   X  |   C  |   V  |   B  |      |           |      |   N  |   M  |   ,  |   .  |//Ctrl| ~L1    |
+ * | LShift | Ctrl | M-CS |   C  |   V  |   B  |      |           |      |   N  |   M  |   ,  |   .  |//Ctrl| ~L1    |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
  *   |  Z   |  '"  |AltShf| Left | Right|                                       |  Up  | Down |   [  |   ]  | RShift |
  *   `----------------------------------'                                       `------------------------------------'
@@ -33,7 +38,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 | Space|Backsp|------|       |------|  Tab   |Enter |
  *                                 |      |ace   | End  |       | PgDn |        |      |
  *                                 `--------------------'       `----------------------'
+ *  M-CS -> M(CTLSHFT): {tap: x, hold: CTRL + SHFT}
  */
+
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
 [BASE] = KEYMAP(  // layer 0 : default
@@ -41,7 +48,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_EQL,         KC_1,         KC_2,           KC_3,    KC_4,   KC_5,   KC_LEFT,
         KC_DELT,        KC_Q,         KC_W,           KC_E,    KC_R,   KC_T,   KC_INSERT,
         KC_GRV,         KC_A,         KC_S,           KC_D,    KC_F,   KC_G,
-        KC_LSFT,        KC_LCTL,      KC_X,           KC_C,    KC_V,   KC_B,   ALL_T(KC_NO),
+        KC_LSFT,        KC_LCTL,      M(CTLSHFT),     KC_C,    KC_V,   KC_B,   ALL_T(KC_NO),
         KC_Z,           KC_QUOT,      LALT(KC_LSFT),  KC_LEFT, KC_RGHT,
                                               ALT_T(KC_APP),   KC_LGUI,
                                                                KC_HOME,
@@ -146,17 +153,34 @@ const uint16_t PROGMEM fn_actions[] = {
     [1] = ACTION_LAYER_TAP_TOGGLE(SYMB)                // FN1 - Momentary Layer 1 (Symbols)
 };
 
+static uint16_t key_timer;  // Our timer to measure how long thins are taking! :D
+
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 {
   // MACRODOWN only works in this function
       switch(id) {
         case 0:
-        if (record->event.pressed) {
-          register_code(KC_RSFT);
-        } else {
-          unregister_code(KC_RSFT);
-        }
-        break;
+          if (record->event.pressed) {
+            register_code(KC_RSFT);
+          } else {
+            unregister_code(KC_RSFT);
+          }
+          break;
+        case CTLSHFT:
+          if (record->event.pressed) {
+            key_timer = timer_read();
+            register_code(KC_LCTL);
+            register_code(KC_LSFT);
+          } else {
+            unregister_code(KC_LCTL);
+            unregister_code(KC_LSFT);
+
+            if (timer_elapsed(key_timer) < KEY_TAP_SLOW) {
+              register_code(KC_X);
+              unregister_code(KC_X);
+            } 
+          }
+          break;
       }
     return MACRO_NONE;
 };

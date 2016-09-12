@@ -3,14 +3,13 @@
 #include "action_layer.h"
 
 #undef LEADER_TIMEOUT
-#define LEADER_TIMEOUT 1000
+#define LEADER_TIMEOUT 200
 
 #define BASE 0 // default layer
 #define SYMB 1 // symbols
 #define MDIA 2 // media keys
 
 // MACROS
-/* #define */
 #define CTLSHFT 1  // M-CS
 
 // TIMERS
@@ -223,7 +222,7 @@ void matrix_scan_user(void) {
       //   register_code(KC_S);
       //   unregister_code(KC_S);
       // }
-      SEQ_TWO_KEYS(KC_G, KC_T) {
+      SEQ_ONE_KEY(KC_T) {
         register_code(KC_LCTL);
         register_code(KC_RBRC);
         unregister_code(KC_RBRC);

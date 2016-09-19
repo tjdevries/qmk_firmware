@@ -5,16 +5,29 @@
 #undef LEADER_TIMEOUT
 #define LEADER_TIMEOUT 200
 
+#define PREVENT_STUCK_MODIFIERS
+
 #define BASE 0 // default layer
 #define SYMB 1 // symbols
 #define MDIA 2 // media keys
+#define WORK 3 // workspace keys
 
 // MACROS
 #define CTLSHFT 1  // M-CS
+#define MAC_CA 2
+#define MAC_CSA 3
+#define WORKSPACE_LEFT 4
+#define WORKSPACE_DOWN 5
+#define WORKSPACE_UP 6
+#define WORKSPACE_RGHT 7
 
 // TIMERS
 #define KEY_TAP_FAST 85
 #define KEY_TAP_SLOW 200
+
+#define M_CS  ( MOD_LSFT | MOD_LCTL )
+/* #define M_CA  ( MOD_LSFT | MOD_LALT ) */
+/* #define M_CSA ( MOD_LSFT | MOD_LALT | MOD_LCTL ) */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /* Keymap 0: Basic layer
@@ -22,11 +35,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,--------------------------------------------------.           ,--------------------------------------------------.
  * |   =    |   1  |   2  |   3  |   4  |   5  | LEFT |           | RIGHT|   6  |   7  |   8  |   9  |   0  |   -    |
  * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
- * | Del    |   Q  |   W  |   E  |   R  |   T  |Insrt |           | LDR  |   Y  |   U  |   I  |   O  |   P  |   \    |
+ * | Del    |   Q  | W/L3 |   E  |   R  |   T  |Insrt |           | LDR  |   Y  |   U  |   I  |   O  |   P  |   \    |
  * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
  * | Grv    |   A  |   S  |   D  |   F  |   G  |------|           |------|   H  | J/Alt|   K  |   L  |; / L2|   '    |
  * |--------+------+------+------+------+------| Hyper|           | Meh  |------+------+------+------+------+--------|
- * | LShift | Ctrl | M-CS |   C  |   V  |   B  |      |           |      |   N  |   M  |   ,  |   .  |//Ctrl| ~L1    |
+ * | LShift | Ctrl |x:M_CS|   C  |   V  |   B  |      |           |      |   N  |   M  |   ,  |   .  |//Ctrl| ~L1    |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
  *   |  Z   |  '"  |AltShf| Left | Right|                                       |  Up  | Down |   [  |   ]  | RShift |
  *   `----------------------------------'                                       `------------------------------------'
@@ -37,19 +50,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 | Space|Backsp|------|       |------|  Tab   |Enter |
  *                                 |      |ace   | End  |       | PgDn |        |      |
  *                                 `--------------------'       `----------------------'
- *  M-CS -> M(CTLSHFT): {tap: x, hold: CTRL + SHFT}
+ * Using:
+ *  x:M_CS -> M(CTLSHFT): {tap: x, hold: CTRL + SHFT}
+ *
+ * Not using:
+ *  M_CA -> {tap: c, hold: CTRL + ALT}
+ *  M_CSA -> {tap: v, hold: CTRL + SHIFT + ALT}
  */
 
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
 [BASE] = KEYMAP(  // layer 0 : default
         // left hand
-        KC_EQL,         KC_1,         KC_2,           KC_3,    KC_4,   KC_5,   KC_LEFT,
-        KC_DELT,        KC_Q,         KC_W,           KC_E,    KC_R,   KC_T,   KC_INSERT,
-        KC_GRV,         KC_A,         KC_S,           KC_D,    KC_F,   KC_G,
-        KC_LSFT,        KC_LCTL,      MT((MOD_LSFT | MOD_LCTL), KC_X),     KC_C,    KC_V,   KC_B,   ALL_T(KC_NO),
+        KC_EQL,         KC_1,         KC_2,           KC_3,           KC_4,            KC_5,   KC_LEFT,
+        KC_DELT,        KC_Q,         LT(WORK, KC_W), KC_E,           KC_R,            KC_T,   KC_INSERT,
+        KC_GRV,         KC_A,         KC_S,           KC_D,           KC_F,            KC_G,
+        KC_LSFT,        KC_LCTL,      MT(M_CS, KC_X), KC_C,           KC_V,            KC_B,   ALL_T(KC_NO),
         KC_Z,           KC_QUOT,      LALT(KC_LSFT),  KC_LEFT, KC_RGHT,
-                                              ALT_T(KC_APP),   KC_LGUI,
+                                                     KC_FN2,   KC_LGUI,
                                                                KC_HOME,
                                               KC_SPC,KC_BSPC,  KC_END,
 
@@ -146,10 +164,52 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        KC_TRNS,
        KC_TRNS, KC_TRNS, KC_WBAK
 ),
+/* Keymap 3: Window management
+ *
+ * ,--------------------------------------------------.           ,-------------------------------------------------------.
+ * |        |      |      |      |      |      |      |           |      |       |       |       |       |       |        |
+ * |--------+------+------+------+------+-------------|           |------+-------+-------+-------+-------+-------+--------|
+ * |        |      |      | LSFT |      |      |      |           |      |       |       |       |       |       |        |
+ * |--------+------+------+------+------+------|      |           |      |-------+-------+-------+-------+-------+--------|
+ * |        |      |      |      |      |      |------|           |------| CA  < | CA  v | CA  ^ | CA  > |       |        |
+ * |--------+------+------+------+------+------|      |           |      |-------+-------+-------+-------+-------+--------|
+ * |        |      |      |      |      |      |      |           |      |       |       |       |       |       |        |
+ * `--------+------+------+------+------+-------------'           `--------------+-------+-------+-------+-------+--------'
+ *   |      |      |      |      |      |                                        |       |       |       |       |        |
+ *   `----------------------------------'                                        `----------------------------------------'
+ *                                        ,-------------.       ,-------------.
+ *                                        |      |      |       |      |      |
+ *                                 ,------|------|------|       |------+------+------.
+ *                                 |      |      |      |       |      |      |      |
+ *                                 |      |      |------|       |------|      |      |
+ *                                 |      |      |      |       |      |      |      |
+ *                                 `--------------------'       `--------------------'
+ */
+// Window management
+[WORK] = KEYMAP(
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_LSFT, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                                           KC_TRNS, KC_TRNS,
+                                                    KC_TRNS,
+                                  KC_TRNS, KC_TRNS, KC_TRNS,
+    // right hand
+       KC_TRNS,  KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,
+       KC_TRNS,  KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,
+                 M(WORKSPACE_LEFT),M(WORKSPACE_DOWN),M(WORKSPACE_UP),  M(WORKSPACE_RGHT),KC_TRNS,          KC_TRNS,
+       KC_TRNS,  KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,
+                                   KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,          KC_TRNS,
+       KC_TRNS, KC_TRNS,
+       KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS
+),
 };
 
 const uint16_t PROGMEM fn_actions[] = {
-    [1] = ACTION_LAYER_TAP_TOGGLE(SYMB)                // FN1 - Momentary Layer 1 (Symbols)
+    [1] = ACTION_LAYER_TAP_TOGGLE(SYMB),                // FN1 - Momentary Layer 1 (Symbols)
+    [2] = ACTION_LAYER_TAP_TOGGLE(WORK)
 };
 
 static uint16_t key_timer;  // Our timer to measure how long thins are taking! :D
@@ -180,6 +240,46 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
             } 
           }
           break;
+        case WORKSPACE_LEFT:
+          if (record->event.pressed) {
+            register_code(KC_LCTL);
+            register_code(KC_LALT);
+            register_code(KC_LEFT);
+            unregister_code(KC_LCTL);
+            unregister_code(KC_LALT);
+            unregister_code(KC_LEFT);
+          }
+          break;
+        case WORKSPACE_DOWN:
+          if (record->event.pressed) {
+            register_code(KC_LCTL);
+            register_code(KC_LALT);
+            register_code(KC_DOWN);
+            unregister_code(KC_LCTL);
+            unregister_code(KC_LALT);
+            unregister_code(KC_DOWN);
+          }
+          break;
+        case WORKSPACE_RGHT:
+          if (record->event.pressed) {
+            register_code(KC_LCTL);
+            register_code(KC_LALT);
+            register_code(KC_RGHT);
+            unregister_code(KC_LCTL);
+            unregister_code(KC_LALT);
+            unregister_code(KC_RGHT);
+          }
+          break;
+        case WORKSPACE_UP:
+          if (record->event.pressed) {
+            register_code(KC_LCTL);
+            register_code(KC_LALT);
+            register_code(KC_UP);
+            unregister_code(KC_LCTL);
+            unregister_code(KC_LALT);
+            unregister_code(KC_UP);
+          }
+          break;
       }
     return MACRO_NONE;
 };
@@ -202,13 +302,14 @@ void matrix_scan_user(void) {
     ergodox_right_led_2_off();
     ergodox_right_led_3_off();
     switch (layer) {
-      // TODO: Make this relevant to the ErgoDox EZ.
         case 1:
             ergodox_right_led_1_on();
             break;
         case 2:
             ergodox_right_led_2_on();
             break;
+        case WORK:
+            ergodox_right_led_3_on();
         default:
             // none
             break;

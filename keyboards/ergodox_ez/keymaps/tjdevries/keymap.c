@@ -4,6 +4,9 @@
 #include "debug.h"
 #include "action_layer.h"
 
+// TODO: Check out one-shot keys
+// TODO: Muniter suggests considering doing something like OSM for Shift, for example
+
 LEADER_EXTERNS();
 
 enum custom_keycodes {
@@ -55,7 +58,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
  * | Grv    |   A  |   S  |   D  | F/Alt|   G  |------|           |------|   H  | J/Alt|   K  |   L  |; / L2|   '    |
  * |--------+------+------+------+------+------| Hyper|           | Meh  |------+------+------+------+------+--------|
- * | LShift | Ctrl |x:M_CS|   C  |   V  |   B  |      |           |      |   N  |   M  |   ,  |   .  |//Ctrl| ~L1    |
+ * | LShift | Ctrl |x:M_CS|   C  |   V  |   B  |      |           |      |   N  |   M  |   ,  |   .  |//LGUI| ~L1    |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
  *   |  Z   |  '"  |AltShf| Left | Right|                                       |  Up  | Down |   [  |   ]  | RShift |
  *   `----------------------------------'                                       `------------------------------------'

@@ -94,7 +94,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
              KC_RGHT,     KC_6,   KC_7,         KC_8,       KC_9,             KC_0,                    KC_MINS,
              KC_LEAD,     KC_Y,   KC_U,         KC_I,       KC_O,             KC_P,                    KC_BSLS,
                           KC_H,   ALT_T(KC_J),  KC_K,       KC_L,             LT(MDIA, KC_SCLN),       KC_QUOT,
-             MEH_T(KC_NO),KC_N,   KC_M,         KC_COMM,    MT(M_LS, KC_DOT), MT(MOD_LGUI, KC_SLSH),   KC_FN1,
+             MEH_T(KC_NO),KC_N,   KC_M,         KC_COMM,    MT(M_LS, KC_DOT), MT(MOD_LGUI, KC_SLSH),   MO(SYMB),
                                   KC_UP,        KC_DOWN,    KC_LBRC,          KC_RBRC,                 KC_RSFT,
              KC_LALT,        CTL_T(KC_ESC),
              KC_PGUP,
@@ -335,10 +335,14 @@ void matrix_scan_user(void) {
 
     // --- makes go to reset
     SEQ_THREE_KEYS(KC_MINS, KC_MINS, KC_MINS) {
+#ifdef RGBLIGHT_COLOR_LAYER_0
+      rgblight_setrgb(RGBLIGHT_COLOR_LAYER_0);
+#endif
       reset_keyboard();
+      did_leader_succeed = true;
     }
     leader_end();
-  }
+  };
 };
 
 
